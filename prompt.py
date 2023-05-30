@@ -1,8 +1,9 @@
 from knowledge import knowledge
 
-
 class Prompt:
-
+    """
+    该类是一个prompt工具类, 根据会话问题，和prompt类型生成不同的特点的prompt
+    """
     def __init__(self) -> None:
         pass
 
@@ -14,9 +15,10 @@ class PromptDataMeshHelperCommon(Prompt):
     context = ""
     question = ""
 
-    def __init__(self, msg: str) -> None:
-        self.context = knowledge.call_knowledge(msg)
-        self.question = msg
+    def __init__(self, question: str) -> None:
+        super().__init__()
+        self.question = question
+        self.context = knowledge.call_knowledge(question)
 
     def gen(self) -> str:
         return f'现在你是腾讯PCG大数据平台部datamesh的技术支持人员，' \
@@ -33,8 +35,8 @@ prompts_map = {
 }
 
 
-def newPromptCMD(msg: str, type: str):
+def newPromptCMD(request: str, type: str):
     # 后续可以增加根据消息进行意图分类选择不同的模版
     if type not in prompts_map.keys():
         return False, None
-    return True, prompts_map.get(type)(msg)
+    return True, prompts_map.get(type)(request)
