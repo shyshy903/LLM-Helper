@@ -7,7 +7,7 @@ import requests
 from flask import Flask, render_template, request, session, send_file, make_response
 import os
 import uuid
-from LRU_cache import LRUCache
+from lru_cache import LRUCache
 import threading
 import pickle
 import asyncio
@@ -144,14 +144,6 @@ def handle_messages_get_response(message, apikey, message_history, have_chat_con
     message_context = get_message_context(message_history, have_chat_context, chat_with_history)
     response = get_response_from_ChatGPT_API(message_context, apikey)
     message_history.append({"role": "assistant", "content": response})
-    # 换行打印messages_history
-    # print("message_history:")
-    # for i, message in enumerate(message_history):
-    #     if message['role'] == 'user':
-    #         print(f"\t{i}:\t{message['role']}:\t\t{message['content']}")
-    #     else:
-    #         print(f"\t{i}:\t{message['role']}:\t{message['content']}")
-
     return response
 
 
