@@ -18,9 +18,6 @@ app.config['SECRET_KEY'] = os.urandom(24)
 
 with open("config.yaml", "r", encoding="utf-8") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
-    if 'HTTPS_PROXY' in config:
-        if os.environ.get('HTTPS_PROXY') is None:  # 优先使用环境变量中的代理，若环境变量中没有代理，则使用配置文件中的代理
-            os.environ['HTTPS_PROXY'] = config['HTTPS_PROXY']
     if 'PASSWORD' in config:
         PASSWORD = config['PASSWORD']
     else:
@@ -49,10 +46,7 @@ STREAM_FLAG = True  # 是否开启流式推送
 USER_DICT_FILE = "all_user_dict_v3.pkl"  # 用户信息存储文件（包含版本）
 lock = threading.Lock()  # 用于线程锁
 
-project_info = "## ChatGPT 网页版    \n" \
-               " Code From  " \
-               "[ChatGPT-Web](https://github.com/LiangYang666/ChatGPT-Web)  \n" \
-               "发送`帮助`可获取帮助  \n"
+project_info = "你好，我是DataMesh-Helper，你对DataMesh产品有相关对使用咨询可以在这里咨询我！\n"
 
 
 def get_response_from_ChatGPT_API(message_context, apikey,
@@ -885,4 +879,4 @@ if __name__ == '__main__' or __name__ == 'main':
         print("请在openai官网注册账号，获取api_key填写至程序内或命令行参数中")
         exit()
     if os.getenv("DEPLOY_ON_ZEABUR") is None:
-        app.run(host="0.0.0.0", port=PORT, debug=False)
+        app.run(host="127.0.0.1", port=PORT, debug=False)
