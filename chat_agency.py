@@ -33,6 +33,9 @@ class ChatAgency:
         """
 
     def ask_without_stream(self) -> str:
+        """
+        无流式的返回消息
+        """
         # 获取llm模型
         llm_model = llm.get_llm_model(self.model)
         # 加载历史消息
@@ -45,6 +48,9 @@ class ChatAgency:
         return answer
 
     def ask_with_stream(self):
+        """
+        流式的返回消息
+        """
         # 获取llm模型
         llm_model = llm.get_llm_model(self.model)
         # 加载历史消息
