@@ -7,8 +7,11 @@ class LLMBaseModel:
     def __int__(self):
         pass
 
-    def ask(self, request: str, history_msg: list) -> str:
+    def ask_without_stream(self, request: str, history_msg: list) -> str:
         return ''
+
+    def ask_with_stream(self, request: str, history_msg: list):
+        return []
 
 
 model_map = {

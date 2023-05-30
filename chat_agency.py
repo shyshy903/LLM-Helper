@@ -3,7 +3,7 @@ import model.llm_model as llm
 
 class ChatAgency:
     """
-    该类是一个chatAgency工具类, 属于会话层的基本结构，用于对模型进行提问和获取回答
+    该类是一个chatAgency工具类, 属于会话层与模型交流的中间层（属于一个通用的结构层插件）
     包含属性 user_id (用户) , session_id （会话）, 事件（span_id), request (请求), model (模型), answer (回答),
     """
     user_id = "123"
@@ -21,21 +21,40 @@ class ChatAgency:
         self.model = model
         self.answer = answer
 
-
     def load_history_msg(self) -> list:
         """
         加载历史消息, 格式为
         [{"user": "你是谁", "helper": "我是datamesh产品的helper"}]
         """
 
+    def save_history_msg(self):
+        """
+        保存消息到消息文件中
+        """
 
-
-    def ask_without_stream(self):
+    def ask_without_stream(self) -> str:
+        # 获取llm模型
         llm_model = llm.get_llm_model(self.model)
-        history_msg = self.load_history_msg();
-        answer = llm_model.ask(history_msg, self.request)
+        # 加载历史消息
+        history_msg = self.load_history_msg()
+        # 提问模型
+        answer = llm_model.ask_without_stream(history_msg, self.request)
+        self.answer = answer
+        # 保存消息
+        self.save_history_msg()
+        return answer
 
+    def ask_with_stream(self):
+        # 获取llm模型
+        llm_model = llm.get_llm_model(self.model)
+        # 加载历史消息
+        history_msg = self.load_history_msg()
+        # 提问模型
+        answer = llm_model.ask_with_stream(history_msg, self.request)
 
+        # 构建一个生成器
+        def generate():
+            for token in answer:
+                yield token
 
-
-
+        return generate
