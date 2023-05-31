@@ -7,7 +7,7 @@ import requests
 from flask import Flask, render_template, request, session, send_file, make_response
 import os
 import uuid
-from lru_cache import LRUCache
+from LRU_cache import LRUCache
 import threading
 import pickle
 import asyncio

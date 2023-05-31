@@ -4,12 +4,16 @@ SERVER_PORT = '10002'
 SERVER_DEBUG = True
 
 # OPENAI
-OPENAI_API_KEY = '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'
+OPENAI_API_KEY = ''
 
 # mongodb
 MONGODB_DSN = "mongodb://127.0.0.1:27017/"
 MONGODB_DB = "chat-assistant"
 MONGODB_COl = "chat_record"
+
+# user dict
+USER_DICT_FILE = ""
+USER_SAVE_MAX = 12
 
 # embedding
 EMBEDDING_SAVE_PATH = "./emb"
