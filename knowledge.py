@@ -14,7 +14,7 @@ class Knowledge:
         pass
 
 
-    def __save__knowledge__(self):
+    def save_knowledge(self):
         text_splitter = TokenTextSplitter(chunk_size=config.CHUNK_SIZE, chunk_overlap=config.CHUNK_OVERLAP)
         doc_loader = DirectoryLoader(config.DOCUMENT_DATA_PATH, glob='**/*.txt')
         docs = doc_loader.load()
@@ -40,32 +40,33 @@ class Knowledge:
         vectordb.persist()
 
 
-    def __clear_knowledge__(self):
+    def clear_knowlede(self):
         os.rmdir(config.EMBEDDING_SAVE_PATH)
         pass
 
 
-    def __get_knowledge__(self, msg: str) -> str:
-        vectordb = Chroma(persist_directory=config.EMBEDDING_SAVE_PATH, embedding_function=self.emb_model)
-        retriever = vectordb.as_retriever(search_type="similarity")
-        retriever.search_kwargs['distance_metric'] = 'cos'
-        retriever.search_kwargs['k'] = config.DOCUMENT_CALLBACK_COUNT
-        print(msg)
-        docs = retriever.get_relevant_documents(msg)
-        print(docs)
-        res_str = ""
-        for doc in docs:
-            res_str = res_str + doc.page_content
-            res_str += "\n"
+    def get_knowledeg(self, msg: str) -> str:
+        try:
+            vectordb = Chroma(persist_directory=config.EMBEDDING_SAVE_PATH, embedding_function=self.emb_model)
+            docs = vectordb.similarity_search(msg, k=config.DOCUMENT_CALLBACK_COUNT)
+            print(msg)
+            print(docs)
+            res_str = ""
+            for doc in docs:
+                res_str = res_str + doc.page_content
+                res_str += "\n"
+        except Exception as e:
+            res_str = ""
+        print(len(res_str))
         return res_str
 
     def call_knowledge(self, msg: str):
-        return self.__get_knowledge__(msg)
+        return self.get_knowledeg(msg)
 
 
 knowledge = Knowledge()
 
 if __name__ == "__main__":
-    # knowledge.__save__knowledge__()
-    print(knowledge.call_knowledge("怎么创建实时画布链路？"))
+    # knowledge.get_knowledeg()
+    print(knowledge.call_knowledge("怎么创建空间？"))
 
