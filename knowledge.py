@@ -71,4 +71,4 @@ knowledge = Knowledge()
 
 if __name__ == "__main__":
     # knowledge.save_knowledge()
-    print(knowledge.call_knowledge("怎么在DataMesh创建空间？"))
+    print(knowledge.call_knowledge("实时作业怎么配置告警"))

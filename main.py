@@ -38,11 +38,11 @@ with open("config.yaml", "r", encoding="utf-8") as f:
 
 if os.getenv("DEPLOY_ON_RAILWAY") is not None or os.getenv("DEPLOY_ON_ZEABUR"):  # 如果是云部署，需要删除代理
     os.environ.pop('HTTPS_PROXY', None)
-
+#
 API_KEY = os.getenv("OPENAI_API_KEY", default=API_KEY)  # 如果环境变量中设置了OPENAI_API_KEY，则使用环境变量中的OPENAI_API_KEY
-PORT = os.getenv("PORT", default=PORT)  # 如果环境变量中设置了PORT，则使用环境变量中的PORT
+# PORT = os.getenv("PORT", default=PORT)  # 如果环境变量中设置了PORT，则使用环境变量中的PORT
 PASSWORD = os.getenv("PASSWORD", default=PASSWORD)  # 如果环境变量中设置了PASSWORD，则使用环境变量中的PASSWORD
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", default=ADMIN_PASSWORD)  # 如果环境变量中设置了ADMIN_PASSWORD，则使用环境变量中的ADMIN_PASSWORD
+# ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", default=ADMIN_PASSWORD)  # 如果环境变量中设置了ADMIN_PASSWORD，则使用环境变量中的ADMIN_PASSWORD
 if ADMIN_PASSWORD == "":
     ADMIN_PASSWORD = PASSWORD  # 如果ADMIN_PASSWORD为空，则使用PASSWORD
 
@@ -904,12 +904,11 @@ def check_load_pickle():
 
 if __name__ == '__main__' or __name__ == 'main':
     print("持久化存储文件路径为:", os.path.join(os.getcwd(), USER_DICT_FILE))
-    all_user_dict = LRUCache(USER_SAVE_MAX)
+    all_user_dict = LRUCache(global_config.USER_SAVE_MAX)
     check_load_pickle()
-
     if len(API_KEY) == 0:
         # 退出程序
         print("请在openai官网注册账号，获取api_key填写至程序内或命令行参数中")
         exit()
     if os.getenv("DEPLOY_ON_ZEABUR") is None:
-        app.run(host="127.0.0.1", port=PORT, debug=False)
+        app.run(host=global_config.SERVER_IP, port=global_config.SERVER_PORT, debug=global_config.SERVER_DEBUG)
