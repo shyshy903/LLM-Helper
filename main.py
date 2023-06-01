@@ -2,7 +2,7 @@ import datetime
 import json
 import shutil
 import tempfile
-
+import config as global_config
 import requests
 from flask import Flask, render_template, request, session, send_file, make_response
 import os
@@ -12,6 +12,10 @@ import threading
 import pickle
 import asyncio
 import yaml
+import prompts
+from chat_agency import ChatAgency
+import llm_model as llm
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -42,10 +46,10 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", default=ADMIN_PASSWORD)  # 如果�
 if ADMIN_PASSWORD == "":
     ADMIN_PASSWORD = PASSWORD  # 如果ADMIN_PASSWORD为空，则使用PASSWORD
 
-STREAM_FLAG = True  # 是否开启流式推送
+STREAM_FLAG = global_config.OPEN_STREAM  # 是否开启流式推送
 USER_DICT_FILE = "all_user_dict_v3.pkl"  # 用户信息存储文件（包含版本）
 lock = threading.Lock()  # 用于线程锁
-
+API_KEY = global_config.OPENAI_API_KEY
 project_info = "你好，我是DataMesh-Helper，你对DataMesh产品有相关对使用咨询可以在这里咨询我！\n"
 
 
@@ -161,12 +165,11 @@ def get_response_stream_generate_from_ChatGPT_API(message_context, apikey, messa
     :param max_tokens: 最大token数量
     :return: 回复生成器
     """
-    if apikey is None:
-        apikey = API_KEY
+    apikey = API_KEY
 
     header = {"Content-Type": "application/json",
               "Authorization": "Bearer " + apikey}
-
+    print(apikey)
     data = {
         "model": model,
         "temperature": temperature,
@@ -496,11 +499,7 @@ def new_chat_dict(user_id, name, send_time):
     return {"chat_with_history": False,
             "have_chat_context": 0,  # 从每次重置聊天模式后开始重置一次之后累计
             "name": name,
-            "messages_history": [{"role": "assistant", "content": project_info},
-                                 {"role": "web-system", "content": f"当前对话的用户id为{user_id}"},
-                                 {"role": "web-system", "content": send_time},
-                                 {"role": "web-system", "content": f"你已添加了{name}，现在可以开始聊天了。"},
-                                 ]}
+            "messages_history": [{"role": "assistant", "content": project_info}]}
 
 
 def new_user_dict(user_id, send_time):
@@ -509,8 +508,8 @@ def new_user_dict(user_id, send_time):
                  "selected_chat_id": chat_id,
                  "default_chat_id": chat_id}
 
-    user_dict['chats'][chat_id]['messages_history'].insert(1, {"role": "assistant",
-                                                               "content": "创建新的用户id成功，请牢记该id"})
+    # user_dict['chats'][chat_id]['messages_history'].insert(1, {"role": "assistant",
+    #                                                            "content": "创建新的用户id成功，请牢记该id"})
     return user_dict
 
 
@@ -563,8 +562,37 @@ def get_balance(apikey):
                   f"\n" + recent
 
 
-@app.route('/returnMessage', methods=['GET', 'POST'])
+@app.route('/returnMessageModel', methods=['GET', 'POST'])
 def return_message():
+    """
+    获取用户发送的消息，调用get_chat_response()获取回复，返回回复，用于更新聊天框
+    :return:
+    """
+    check_session(session)
+    request_data = request.get_json()
+    messages = request_data.get("messages")
+    chat_id = request_data.get("chat_id")
+    if chat_id is None:
+        chat_id = session.get("session_id")
+    content = messages[0]['content']
+    user_id = session.get("user_id")
+    print(chat_id, content)
+    ok, pc = prompts.newPromptCMD(content, "datamesh_helper")
+    question = ""
+    if ok:
+        question = pc.gen()
+    print(user_id,chat_id,question)
+    chat_agency = ChatAgency()
+    chat_agency.user_id = user_id
+    chat_agency.session_id = chat_id
+    chat_agency.span_id = uuid.uuid1()
+    chat_agency.request = question
+    chat_agency.model = global_config.LLM_MODEL_NAME
+    generate = chat_agency.ask_with_stream()
+    return app.response_class(generate(), mimetype='application/json')
+
+@app.route('/returnMessage', methods=['GET', 'POST'])
+def return_message_gpt():
     """
     获取用户发送的消息，调用get_chat_response()获取回复，返回回复，用于更新聊天框
     :return:
@@ -696,8 +724,7 @@ def return_message():
             apikey = user_info.get('apikey')
             if chat_with_history:
                 user_info['chats'][chat_id]['have_chat_context'] += 1
-            if display_time:
-                messages_history.append({'role': 'web-system', "content": send_time})
+
             for m in messages:
                 keys = list(m.keys())
                 for k in keys:
@@ -706,11 +733,16 @@ def return_message():
             if not STREAM_FLAG:
                 if save_message:
                     messages_history.append(messages[-1])
-                response = get_response_from_ChatGPT_API(messages, apikey)
+                llm_model = llm.get_llm_model(global_config.LLM_MODEL_NAME)
+                ok, pc = prompts.newPromptCMD(send_message, "datamesh_helper")
+                question = ""
+                if ok:
+                    question = pc.gen()
+                response = llm_model.ask_without_stream(question, messages_history, chat_id)
+                # response = get_response_from_ChatGPT_API(messages, apikey)
                 if save_message:
                     messages_history.append({"role": "assistant", "content": response})
                 asyncio.run(save_all_user_dict())
-
                 print(f"用户({session.get('user_id')})得到的回复消息:{response[:40]}...")
                 # 异步存储all_user_dict
                 asyncio.run(save_all_user_dict())
@@ -718,12 +750,21 @@ def return_message():
             else:
                 if save_message:
                     messages_history.append(messages[-1])
+                    # print(messages_history)
+                print("messages###", messages)
+                print("messages_history", messages_history)
                 asyncio.run(save_all_user_dict())
                 if not save_message:
                     messages_history = []
-                generate = get_response_stream_generate_from_ChatGPT_API(messages, apikey, messages_history,
-                                                                         model=model, temperature=temperature,
-                                                                         max_tokens=max_tokens)
+                llm_model = llm.get_llm_model(global_config.LLM_MODEL_NAME)
+                ok, pc = prompts.newPromptCMD(send_message, "datamesh_helper")
+                question = ""
+                if ok:
+                    question = pc.gen()
+                generate = llm_model.ask_with_stream(question, messages_history, chat_id)
+                # generate = get_response_stream_generate_from_ChatGPT_API(messages, apikey, messages_history,
+                #                                                          model=model, temperature=temperature,
+                #                                                          max_tokens=max_tokens)
                 return app.response_class(generate(), mimetype='application/json')
 
 

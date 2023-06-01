@@ -1,0 +1,36 @@
+
+
+Q:如何彻底删除impala表
+答：删除底层表 https://iwiki.woa.com/tencent/api/attachments/s3/url?attachmentid=1660020, 提供集群库表等信息联系DSC_SRE_Helper进行数据删除，删除注册元数据可以直接在元数据管理页面进行删除;
+Q:创建impala表时,提示“表已存在”，如何处理
+答: 提供集群库表等信息联系DSC_SRE_Helper处理.或换一个表名再进行创建
+Q:impala表和sql是一致的，为啥运行后报错字段不匹
+答：大概率是表操作过删除，但没有彻底删除。解决方案：
+ 方案一： 换表名后，重新关联链路进行运行
+ 方案二：参考Q2 完成impala表的彻底删除，然后再进行重建
+Q:字段添加失败，怎么处理？
+这个报错是指调用impala字段超时，可以等2min后，重新编辑.https://iwiki.woa.com/tencent/api/attachments/s3/url?attachmentid=1662713,编辑==》“拉取字段”==〉保存
+Q:imapla注册提示“序号0字段格式错误”
+答：如图按照指引填写下面的0号字段信息 https://iwiki.woa.com/tencent/api/attachments/s3/url?attachmentid=1660089
+Q:impala的保存时间是多少？是否可以延长
+答：表默认的保存时间为180天，不支持永久保存，最多730天。需要修改保存时间，发邮件并联系DSC_SRE_Helper 处理：
+发邮件给v_yingtjie，说明一下原因，抄送运营rtx、vinkyhe和你们的相关同学；
+邮件主题：【申请】延长/缩短表存储周期
+邮件内容包括以下信息：
+1、集群
+2、库表名
+3、保存周期
+4、延长/缩短周期的原因/使用场景
+Q:注册腾讯云ClickHose数据源，连通性测试失败
+答：注册数据源不能选择本地表，需要是分布式表。具体创建参考：ClickHouse数据源注册
+Q:clickhouse的数据源注册时，集群名称怎么写？
+答：对应腾讯云注册中的cluster信息,https://iwiki.woa.com/tencent/api/attachments/s3/url?attachmentid=1667779
+Q:注册clickhouse表提示“外部表创建失败”
+答：咨询用户对应的表是否已创建，在clickhouse中会增加”_local”字样的表，图中就查询“t_tmp_qb_good_adgroup_t_jinsgap_0308_local”/“t_tmp_qb_good_adgroup_t_jinsgap_0308” 是否已存在
+方案一：换一个表名进行使用
+方案二：注册时，选择“注册已有表”
+Q:注册cdmq元数据时获取不到对应的topic信息
+答：集群维护人也不可以，在这里有集群权限没用，需要有topic权限；
+需要有topic负责人权限，运维权限可能不行；
+Q:Ckafka数据源是否支持json格式的解析
+答：不支持，只可以当作一个大文本来使用

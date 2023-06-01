@@ -33,7 +33,7 @@ class ChatRecord:
 
     def insert(self, user_id, session_id, span_id, request, answer):
         self.check_user(user_id)
-        self.check_session(user_id,session_id)
+        self.check_session(user_id, session_id)
         self.check_span(user_id, session_id, span_id)
         self.all_user_dict[user_id][session_id][span_id]['request'] = request
         self.all_user_dict[user_id][session_id][span_id]['answer'] = answer
@@ -56,11 +56,13 @@ class ChatRecord:
 
     def check_user(self, user_id):
         user_info = self.get_user_info(user_id)
+        # print(user_info)
         if user_info is None:
             self.insert_user_info(user_id)
 
     def insert_user_info(self, user_id):
         self.all_user_dict[user_id] = {}
+        print(self.all_user_dict)
 
     def get_user_info(self, user_id):
         user_info = self.all_user_dict.get(user_id)

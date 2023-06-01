@@ -7,14 +7,12 @@ import os
 
 
 class Knowledge:
-    """
-    该类主要用于构建本地知识库
-    """
 
-    emb_model = OpenAIEmbeddings(openai_api_key=config.OPENAI_API_KEY)
+    emb_model = OpenAIEmbeddings(openai_api_key = config.OPENAI_API_KEY)
 
     def __int__(self) -> None:
         pass
+
 
     def __save__knowledge__(self):
         text_splitter = TokenTextSplitter(chunk_size=config.CHUNK_SIZE, chunk_overlap=config.CHUNK_OVERLAP)
@@ -41,9 +39,11 @@ class Knowledge:
         vectordb.add_texts(texts, metadatas)
         vectordb.persist()
 
+
     def __clear_knowledge__(self):
         os.rmdir(config.EMBEDDING_SAVE_PATH)
         pass
+
 
     def __get_knowledge__(self, msg: str) -> str:
         vectordb = Chroma(persist_directory=config.EMBEDDING_SAVE_PATH, embedding_function=self.emb_model)
@@ -52,6 +52,7 @@ class Knowledge:
         retriever.search_kwargs['k'] = config.DOCUMENT_CALLBACK_COUNT
         print(msg)
         docs = retriever.get_relevant_documents(msg)
+        print(docs)
         res_str = ""
         for doc in docs:
             res_str = res_str + doc.page_content
@@ -65,5 +66,6 @@ class Knowledge:
 knowledge = Knowledge()
 
 if __name__ == "__main__":
-    knowledge.__save__knowledge__()
+    # knowledge.__save__knowledge__()
     print(knowledge.call_knowledge("怎么创建实时画布链路？"))
+

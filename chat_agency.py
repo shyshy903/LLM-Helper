@@ -27,6 +27,9 @@ class ChatAgency:
         [{"request": "你是谁", "answer": "我是datamesh产品的helper"}]
         """
         message_list = []
+        chat_record.check_user(self.user_id)
+        chat_record.check_session(self.user_id, self.session_id)
+        print(self.user_id, self.session_id, "history")
         session_info = chat_record.get_session_info(self.user_id, self.session_id)
         for span_id, value_dict in session_info.items():
             span_dict = {'request': value_dict['request'], 'answer': value_dict['answer']}
@@ -64,12 +67,8 @@ class ChatAgency:
         # 加载历史消息
         history_msg = self.load_history_msg()
         # 提问模型
-        answer = llm_model.ask_with_stream(request=self.request, history_msg=history_msg)
-
+        generate = llm_model.ask_with_stream(request=self.request, history_msg=history_msg)
         # 构建一个生成器
-        def generate():
-            for token in answer:
-                yield token
         return generate
 
 
@@ -83,5 +82,5 @@ if __name__ == "__main__":
     chat_agency.span_id = "001"
     chat_agency.save_history_msg()
     print(chat_agency.load_history_msg())
-    chat_agency.model = "gpt-3.5"
-    print(chat_agency.ask_without_stream())
+    chat_agency.model = "gpt"
+    print(chat_agency.ask_with_stream())
