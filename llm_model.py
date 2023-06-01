@@ -135,7 +135,7 @@ class ChatGLM(LLMBaseModel):
 
     def ask_with_stream(self, request: str, history_msg: list, session_id: str):
         body = {
-            'sessionId': session_id, 'request': 'hello',
+            'sessionId': "e4034d09809d605a", 'request': request,
         }
 
         url = 'http://v2.open.venus.oa.com'
@@ -150,20 +150,29 @@ class ChatGLM(LLMBaseModel):
         }
 
         # 发送请求, 注意需要设置 stream 为 True, 表示流式接收返回数据
+        print(body)
         response = requests.post(url + path, stream=True, headers=headers, data=json.dumps(body))
+        # 如果有异常情况, response body 是一个 json 结构, 自行解析出异常信息
+        if response.headers['Content-Type'].startswith('application/json'):
+            print(response.json()['message'])
+            exit(1)
         client = sseclient.SSEClient(response)
         def generate():
             stream_content = str()
             one_message = {"role": "assistant", "content": stream_content}
             history_msg.append(one_message)
             for event in client.events():
-                print(event)
+                data = ""
+                print("##event", event.event)
+                print("##data", event.data, type(event.data))
                 if event.event == '[DONE]':
+                    data = ""
                     asyncio.run(main.save_all_user_dict())
                 if event.event == '[DATA]':
-                    data = event.data["data"]
+                    data = event.data
+                    data = json.loads(data)['data']
                     one_message['content'] = one_message['content'] + data
-                    yield data
+                yield data
         return generate
 
     def list_all_model(self):

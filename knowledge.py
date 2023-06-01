@@ -70,5 +70,5 @@ class Knowledge:
 knowledge = Knowledge()
 
 if __name__ == "__main__":
-    # knowledge.get_knowledeg()
-    print(knowledge.call_knowledge("2023年nba总冠军是？"))
+    # knowledge.save_knowledge()
+    print(knowledge.call_knowledge("怎么在DataMesh创建空间？"))
