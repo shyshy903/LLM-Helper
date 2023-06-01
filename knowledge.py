@@ -48,11 +48,14 @@ class Knowledge:
     def get_knowledeg(self, msg: str) -> str:
         try:
             vectordb = Chroma(persist_directory=config.EMBEDDING_SAVE_PATH, embedding_function=self.emb_model)
-            docs = vectordb.similarity_search(msg, k=config.DOCUMENT_CALLBACK_COUNT)
+            docs = vectordb.similarity_search_with_score(msg, k=config.DOCUMENT_CALLBACK_COUNT)
             print(msg)
-            print(docs)
+            print(docs[0])
             res_str = ""
-            for doc in docs:
+            for doc,score in docs:
+                print(score)
+                if score < 0.1:
+                    continue
                 res_str = res_str + doc.page_content
                 res_str += "\n"
         except Exception as e:
@@ -68,5 +71,4 @@ knowledge = Knowledge()
 
 if __name__ == "__main__":
     # knowledge.get_knowledeg()
-    print(knowledge.call_knowledge("怎么创建空间？"))
-
+    print(knowledge.call_knowledge("2023年nba总冠军是？"))

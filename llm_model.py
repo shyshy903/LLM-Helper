@@ -68,6 +68,8 @@ class GPT3(LLMBaseModel):
         # message_list = history_msg
         message_list = [i for i in history_msg[:-1]]
         message_list.append({"role": "user", "content": request})
+        if len(message_list) > global_config.MAX_HISTORY_MESSAGE:
+            message_list = message_list[-global_config.MAX_HISTORY_MESSAGE:]
         print(message_list)
         response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=message_list, stream=True)
         # print(response)

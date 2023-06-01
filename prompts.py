@@ -22,12 +22,13 @@ class PromptDataMeshHelperCommon(Prompt):
 
     def gen(self) -> str:
         return f'现在你是腾讯PCG大数据平台部datamesh的技术支持人员，' \
-               f'请根据背景信息回答问题：背景信息如下: {self.context}' \
-               f'请根据上面的背景信息回答用户的问题，你可以根据历史消息和下面的问题综合回答问题，问题如下:{self.question}，' \
-               f'请注意，回答的过程应尽量避免使用背景信息、用户、回答等词汇；' \
-               f'如果你无法根据背景信息回答问题，请按照下面的话术进行回复：' \
+               f': {self.context}' \
+               f'请根据上面的背景信息回答用户的问题，你可以根据历史消息和下面的问题综合回答用户的咨询问题，问题如下:{self.question}，' \
+               f'请注意，这是一些注意事项：你需要根据背景信息和历史对话信息进行回答问题，但是回复中不要涉及背景信息等词汇，' \
+                f'回复时你需要以DataMesh的客服机器人的角色认知只需要回答用户的问题；' \
+               f'如果你无法根据背景信息回答问题，只回答下面的句子，你的回答应该是：' \
                f'不好意思，目前我还无法回复您的问题，如果需要更多帮助可以参考我们的知识库，' \
-               f'知识库链接是https://iwiki.woa.com/pages/viewpage.action?pageId=4007614588，或者点击人工，请求帮助'
+               f'知识库链接是https://iwiki.woa.com/pages/viewpage.action?pageId=4007614588，或者企业微信联系DataMeshHelper小助手接入人工服务，请求帮助'
 
 
 prompts_map = {
